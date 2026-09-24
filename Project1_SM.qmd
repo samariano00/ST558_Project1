@@ -1,0 +1,16 @@
+---
+title: "Project1_SM"
+author: "Sofia Mariano"
+format: html
+editor: visual
+---
+Prepare session to perform analysis:
+
+# Part 1: Data Processing
+## Parsing Variable Values
+## Parsing API Data
+## Combining Years
+# Part 2: Writing a Generic Function for Summarizing
+## Generic Functions
+## Numeric Summaries
+## Graphical Summaries
