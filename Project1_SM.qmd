@@ -5,9 +5,41 @@ format: html
 editor: visual
 ---
 Prepare session to perform analysis:
+```{r}
+library(httr)
+library(jsonlite)
+library(tidyverse)
+library(dplyr)
+```
 
 # Part 1: Data Processing
 ## Parsing Variable Values
+Create list for 2021
+```{r}
+# Read in raw 2021 data
+data_2021 <- httr::GET("https://api.census.gov/data/2021/acs/acs1/pums/variables.json")
+
+# Parse variables
+parsed_2021 <- jsonlite::fromJSON(rawToChar(data_2021$content))
+list_2021 <- list(parsed_2021)
+
+```
+
+Create list for 2022
+```{r}
+
+```
+
+Create list for 2023
+```{r}
+
+```
+
+Create list for 2024
+```{r}
+
+```
+
 ## Parsing API Data
 ## Combining Years
 # Part 2: Writing a Generic Function for Summarizing
