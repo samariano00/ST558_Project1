@@ -22,7 +22,8 @@ data_2021 <- httr::GET("https://api.census.gov/data/2021/acs/acs1/pums/variables
 # Parse variables
 parsed_2021 <- jsonlite::fromJSON(rawToChar(data_2021$content))
 list_2021 <- list(parsed_2021)
-
+variables_2021 <- list_2021[c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER", "HHL", "SCH", "SCHL", "SEX", "ST", "REGION", "DIVISION")]
+saveRDS(variables_2021, file = "data/data_2021.RDS")
 ```
 
 Create list for 2022
