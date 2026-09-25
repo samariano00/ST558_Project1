@@ -23,22 +23,43 @@ data_2021 <- httr::GET("https://api.census.gov/data/2021/acs/acs1/pums/variables
 parsed_2021 <- jsonlite::fromJSON(rawToChar(data_2021$content))
 list_2021 <- list(parsed_2021)
 variables_2021 <- list_2021[c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER", "HHL", "SCH", "SCHL", "SEX", "ST", "REGION", "DIVISION")]
-saveRDS(variables_2021, file = "data/data_2021.RDS")
+saveRDS(variables_2021, file = "data/rawdata_2021.RDS")
 ```
 
 Create list for 2022
 ```{r}
+# Read in raw 2022 data
+data_2022 <- httr::GET("https://api.census.gov/data/2022/acs/acs1/pums/variables.json")
 
+# Parse variables
+parsed_2022 <- jsonlite::fromJSON(rawToChar(data_2022$content))
+list_2022 <- list(parsed_2022)
+variables_2022 <- list_2022[c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER", "HHL", "SCH", "SCHL", "SEX", "ST", "REGION", "DIVISION")]
+saveRDS(variables_2022, file = "data/rawdata_2022.RDS")
 ```
 
 Create list for 2023
 ```{r}
+# Read in raw 2023 data
+data_2023 <- httr::GET("https://api.census.gov/data/2023/acs/acs1/pums/variables.json")
 
+# Parse variables
+parsed_2023 <- jsonlite::fromJSON(rawToChar(data_2023$content))
+list_2023 <- list(parsed_2023)
+variables_2023 <- list_2023[c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER", "HHL", "SCH", "SCHL", "SEX", "STATE", "REGION", "DIVISION")]
+saveRDS(variables_2023, file = "data/rawdata_2023.RDS")
 ```
 
 Create list for 2024
 ```{r}
+# Read in raw 2024 data
+data_2024 <- httr::GET("https://api.census.gov/data/2024/acs/acs1/pums/variables.json")
 
+# Parse variables
+parsed_2024 <- jsonlite::fromJSON(rawToChar(data_2024$content))
+list_2024 <- list(parsed_2024)
+variables_2024 <- list_2024[c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER", "HHL", "SCH", "SCHL", "SEX", "STATE", "REGION", "DIVISION")]
+saveRDS(variables_2024, file = "data/rawdata_2024.RDS")
 ```
 
 ## Parsing API Data
