@@ -71,7 +71,9 @@ saveRDS(variables_2024, file = "data/rawdata_2024.RDS")
 Using usual coding practice, query API and return a tibble.  Data from 2021 used for this example.
 ```{r}
 # Read-in URL
-usual_2021 <- httr::GET("https://api.census.gov/data/2021/acs/acs1/pums/variables.json")
+usual_2021 <- httr::GET("https://api.census.gov/data/2021/acs/acs1/pums?get=SEX,PWGTP,MAR&SCHL=24&key=b195a5a7b89af4ff112dcbfe5e6a9eff2102afad")
+
+usual_2021
 
 # Parse data
 parsed_usual_2021 <- jsonlite::fromJSON(rawToChar(usual_2021$content))
