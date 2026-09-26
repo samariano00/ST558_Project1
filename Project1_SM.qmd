@@ -1,6 +1,7 @@
 ---
 title: "Project1_SM"
 author: "Sofia Mariano"
+date: "30 Sept. 2026"
 format: html
 editor: visual
 ---
@@ -19,10 +20,11 @@ Create list for 2021
 # Read in raw 2021 data
 data_2021 <- httr::GET("https://api.census.gov/data/2021/acs/acs1/pums/variables.json")
 
-# Parse variables
+# Parse and get a list of the desired variables
 parsed_2021 <- jsonlite::fromJSON(rawToChar(data_2021$content))
-list_2021 <- list(parsed_2021)
-variables_2021 <- list_2021[c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER", "HHL", "SCH", "SCHL", "SEX", "ST", "REGION", "DIVISION")]
+variables_2021 <- parsed_2021$variables[c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER", "HHL", "SCH", "SCHL", "SEX", "ST", "REGION", "DIVISION")]
+
+# Save the list as an RDS file in the data folder
 saveRDS(variables_2021, file = "data/rawdata_2021.RDS")
 ```
 
@@ -31,10 +33,11 @@ Create list for 2022
 # Read in raw 2022 data
 data_2022 <- httr::GET("https://api.census.gov/data/2022/acs/acs1/pums/variables.json")
 
-# Parse variables
+# Parse and get a list of the desired variables
 parsed_2022 <- jsonlite::fromJSON(rawToChar(data_2022$content))
-list_2022 <- list(parsed_2022)
-variables_2022 <- list_2022[c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER", "HHL", "SCH", "SCHL", "SEX", "ST", "REGION", "DIVISION")]
+variables_2022 <- parsed_2022$variables[c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER", "HHL", "SCH", "SCHL", "SEX", "ST", "REGION", "DIVISION")]
+
+# Save list as an RDS file in the data folder
 saveRDS(variables_2022, file = "data/rawdata_2022.RDS")
 ```
 
@@ -43,10 +46,11 @@ Create list for 2023
 # Read in raw 2023 data
 data_2023 <- httr::GET("https://api.census.gov/data/2023/acs/acs1/pums/variables.json")
 
-# Parse variables
+# Parse and get a list of the desired variables
 parsed_2023 <- jsonlite::fromJSON(rawToChar(data_2023$content))
-list_2023 <- list(parsed_2023)
-variables_2023 <- list_2023[c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER", "HHL", "SCH", "SCHL", "SEX", "STATE", "REGION", "DIVISION")]
+variables_2023 <- parsed_2023$variables[c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER", "HHL", "SCH", "SCHL", "SEX", "STATE", "REGION", "DIVISION")]
+
+# Save the list as an RDS file in the data folder
 saveRDS(variables_2023, file = "data/rawdata_2023.RDS")
 ```
 
@@ -55,14 +59,31 @@ Create list for 2024
 # Read in raw 2024 data
 data_2024 <- httr::GET("https://api.census.gov/data/2024/acs/acs1/pums/variables.json")
 
-# Parse variables
+# Parse and get a list of the desired variables
 parsed_2024 <- jsonlite::fromJSON(rawToChar(data_2024$content))
-list_2024 <- list(parsed_2024)
-variables_2024 <- list_2024[c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER", "HHL", "SCH", "SCHL", "SEX", "STATE", "REGION", "DIVISION")]
+variables_2024 <- parsed_2024$variables[c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER", "HHL", "SCH", "SCHL", "SEX", "STATE", "REGION", "DIVISION")]
+
+# Save the list as an RDS file in the data folder
 saveRDS(variables_2024, file = "data/rawdata_2024.RDS")
 ```
 
 ## Parsing API Data
+Using usual coding practice, query API and return a tibble.  Data from 2021 used for this example.
+```{r}
+# Read-in URL
+usual_2021 <- httr::GET("https://api.census.gov/data/2021/acs/acs1/pums/variables.json")
+
+# Parse data
+parsed_usual_2021 <- jsonlite::fromJSON(rawToChar(usual_2021$content))
+
+# Return as a tibble
+tibble_2021 <- dplyr::as_tibble(parsed_usual_2021$data)
+
+# Print results to observe if desired output produced
+tibble_2021
+
+```
+
 ## Combining Years
 # Part 2: Writing a Generic Function for Summarizing
 ## Generic Functions
