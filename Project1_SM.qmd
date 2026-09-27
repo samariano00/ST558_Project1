@@ -11,6 +11,7 @@ library(httr)
 library(jsonlite)
 library(tidyverse)
 library(dplyr)
+library(lubridate)
 ```
 
 # Part 1: Data Processing
@@ -101,16 +102,61 @@ search_census(URL_2023)
 Write a function that would query an API while also parsing the values.
 ```{r}
 # Call raw data variable file in order to reference in function
-variable <- readRDS("data/rawdata_variables.RDS")
+variable_list <- readRDS("data/rawdata_variables.RDS")
+
+# Create appropriate categorical variables into factors with appropriate levels
+FER_factor <- factor(variable_list$FER,
+                     levels = c(0,1,2),
+                     labels = c( "N/A (less than 15 years/greater than 50 years/ male)", "No", "Yes")
+                     )
+SEX_factor <- factor(variable_list$SEX,
+                     levels = c(1,2),
+                     labels = c("Male","Female")
+                     )
+SCH_factor <- factor(variable_list$SCH,
+                     levels = c(0,1,2,3),
+                     labels = c("N/A (less than 3 years old)", "No, has not attended in the last 3 months", "Yes, public school or public college", "Yes, private school or college or home school")
+                     )
+SCHL_factor <- factor(variable_list$SCHL,
+                      levels = c(0,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24),
+                      labels = c("N/A (less than 3 years old)", "No schooling completed", "Nursery school, preschool", "Kindergarten", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10", "Grade 11", "12th grade - no diploma", "Regular high school diploma", "GED or alternative credential", "Some college, but less than 1 year", "1 or more years of college credit, no degree", "Associate's degree", "Bachelor's degree", "Master's degree", "Professional degree beyond a bachelor's degree", "Doctorate degree")
+                      )
 
 # Create function
-query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", categorical1 = "SEX", geography = "STATE", geography_value,key){
+query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", categorical1 = "SEX", geography = "STATE", geography_value = "24",key){
   if (year == c("2021","2022","2023","2024")) {
-    print("year")
+    print(year)
   } else {
     "Error: Incorrect Year"
   }
   
+  if (numeric1 | numeric2 != "PWGTP") {
+    "Error: Missing Key Numeric Variable PWGTP"
+  }
+  if (categorical1 == c("FER", "HHL", "SCH", "SCHL", "SEX")){
+    print(categorical1)
+  } else {
+    "Error: Incorrect categorical variable specified"
+  }
+  if (geography == c("REGION", "DIVISION", "ST", "STATE")) {
+    print(geography)
+  } else {
+    "Error: Incorrect Geography Level"
+  }
+  if (geography_value == "all") {
+    print(geography_value)
+  } else if (geography == "REGION" & geography_value %in% variable_list$REGION) {
+    print(geography_value)
+  } else if (geography == "DIVISION" & geography_value %in% variable_list$DIVISION) {
+    print(geography_value)
+  } else if (geography == "ST" & geography_value %in% variable_list$ST) {
+    print(geography_value)
+  } else if (geography == "STATE" & geography_value %in% variable_list$STATE){
+    print(geography_value)
+  } else {
+    "Error: Incorrect Geography Subset Specified"
+  }
+  }
   result <- httr::GET(paste0("https://api.census.gov/data/",
                              year,
                              "/acs/acs1/pums?get=",
@@ -127,6 +173,7 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
                              key
   ))
   parsed <- jsonlite::fromJSON(rawToChar(result$content))
+  class(parsed) <- c("census", class(parsed))
   return(dplyr::as_tibble(parsed$data))
 }
 ```
