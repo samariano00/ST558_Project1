@@ -100,7 +100,35 @@ search_census(URL_2023)
 
 Write a function that would query an API while also parsing the values.
 ```{r}
-query_census <- function(year, numeric, )
+# Call raw data variable file in order to reference in function
+variable <- readRDS("data/rawdata_variables.RDS")
+
+# Create function
+query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", categorical1 = "SEX", geography = "STATE", geography_value,key){
+  if (year == c("2021","2022","2023","2024")) {
+    print("year")
+  } else {
+    "Error: Incorrect Year"
+  }
+  
+  result <- httr::GET(paste0("https://api.census.gov/data/",
+                             year,
+                             "/acs/acs1/pums?get=",
+                             numeric1,
+                             ",",
+                             numeric2,
+                             ",",
+                             categorical1,
+                             "&",
+                             geography,
+                             "=",
+                             geography_value,
+                             "&key=",
+                             key
+  ))
+  parsed <- jsonlite::fromJSON(rawToChar(result$content))
+  return(dplyr::as_tibble(parsed$data))
+}
 ```
 
 ## Combining Years
