@@ -136,24 +136,6 @@ Write a function that would query an API while also parsing the values.
 # Call raw data variable file in order to reference in function
 variable_list <- readRDS("data/rawdata_variables.RDS")
 
-# Create appropriate categorical variables into factors with appropriate levels
-FER_factor <- factor(variable_list$FER,
-                     levels = c(0:2),
-                     labels = c( "N/A (less than 15 years/greater than 50 years/ male)", "No", "Yes")
-                     )
-SEX_factor <- factor(variable_list$SEX,
-                     levels = c(1:2),
-                     labels = c("Male","Female")
-                     )
-SCH_factor <- factor(variable_list$SCH,
-                     levels = c(0:3),
-                     labels = c("N/A (less than 3 years old)", "No, has not attended in the last 3 months", "Yes, public school or public college", "Yes, private school or college or home school")
-                     )
-SCHL_factor <- factor(variable_list$SCHL,
-                      levels = c(0:24),
-                      labels = c("N/A (less than 3 years old)", "No schooling completed", "Nursery school, preschool", "Kindergarten", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10", "Grade 11", "12th grade - no diploma", "Regular high school diploma", "GED or alternative credential", "Some college, but less than 1 year", "1 or more years of college credit, no degree", "Associate's degree", "Bachelor's degree", "Master's degree", "Professional degree beyond a bachelor's degree", "Doctorate degree")
-                      )
-
 # Create function
 query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", categorical1 = "SEX", geography = "STATE", geography_value = "24",key = "b195a5a7b89af4ff112dcbfe5e6a9eff2102afad"){
   # year variable formatting
@@ -164,11 +146,11 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
   }
   # numeric variable formatting
   if (numeric1 %in% c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", 
-"JWMNP")) {
+"JWMNP","PWGTP")) {
     print(numeric1)
   }
   if (numeric2 %in% c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", 
-"JWMNP")) {
+"JWMNP","PWGTP")) {
     print(numeric2)
   } 
   for (item in variable_list$JWAP$item){
@@ -274,6 +256,22 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
   tibble_census <- dplyr::as_tibble(parsed)
   colnames(tibble_census) <- tibble_census[1,]
   tibble_census <- tibble_census[-1,]
+  tibble_census <- tibble_census |>
+    dplyr::mutate(PWGTP <- as.numeric(PWGTP),
+                  AGEP <- as.numeric(AGEP),
+                  GASP <- as.numeric(GASP),
+                  GRPIP <- as.numeric(GRPIP),
+                  JWMNP <- as.numeric(JWMNP),
+                  FER <- factor(FER, 0:2, c( "N/A (less than 15 years/greater than 50 years/ male)", "No", "Yes")
+                     ),
+                  SEX <- factor(SEX,1:2, c("Male","Female")
+                     ),
+                  SCH <- factor(SCH,0:3, c("N/A (less than 3 years old)", "No, has not attended in the last 3 months", "Yes, public school or public college", "Yes, private school or college or home school")
+                     ),
+                  SCHL <- factor(SCHL,0:24, c("N/A (less than 3 years old)", "No schooling completed", "Nursery school, preschool", "Kindergarten", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10", "Grade 11", "12th grade - no diploma", "Regular high school diploma", "GED or alternative credential", "Some college, but less than 1 year", "1 or more years of college credit, no degree", "Associate's degree", "Bachelor's degree", "Master's degree", "Professional degree beyond a bachelor's degree", "Doctorate degree")
+                      )
+                ) |>
+    dplyr::rename("PWGTP" = "PWGTP <- as.numeric(PWGTP)", "AGEP" = "AGEP <- as.numeric(AGEP)", "GASP" = "GASP <- as.numeric(GASP)", "GRPIP" = "GRPIP <- as.numeric(GRPIP)", "JWMNP" = "JWMNP <- as.numeric(JWMNP)")
   class(parsed) <- c("census", class(parsed))
   return(tibble_census)
 }
@@ -282,9 +280,14 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
 Testing the function in various conditions
 ```{r}
 # Testing defaults
-query_census(key)
+query_census()
+
 # Testing acceptable years
+query_census("2023")
+
 # Testing unacceptable years
+query_census("2026")
+
 # Testing acceptable numeric variables
 # Testing unacceptable numeric variables
 # Testing acceptable categorical variables
