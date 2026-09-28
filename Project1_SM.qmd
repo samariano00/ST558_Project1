@@ -12,6 +12,7 @@ library(jsonlite)
 library(tidyverse)
 library(dplyr)
 library(lubridate)
+library(stringr)
 ```
 
 # Part 1: Data Processing
@@ -124,21 +125,63 @@ SCHL_factor <- factor(variable_list$SCHL,
 
 # Create function
 query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", categorical1 = "SEX", geography = "STATE", geography_value = "24",key){
-  if (year == c("2021","2022","2023","2024")) {
+  # year variable formatting
+  if (year %in% c("2021","2022","2023","2024")) {
     print(year)
   } else {
     "Error: Incorrect Year"
   }
-  
+  # numeric variable formatting
+  if (numeric1 %in% c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", 
+"JWMNP")) {
+    print(numeric1)
+  }
+  if (numeric2 %in% c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", 
+"JWMNP")) {
+    print(numeric2)
+  }
+  if (numeric1 | numeric2 %in% c("JWAP", "JWDP") & (is.na(variable_list$JWAP) | is.na(variable_list$JWDP)) == "TRUE" ) {
+    'NA'
+  } else if (numeric1 | numeric2 == "JWAP"){
+    calculate_midpoint <- function(time_range, format_12h = "I:M p", separator = "to")
+      # Split string into start and end time
+      time_parts <- stringr::str_split(time_range, "to")[]
+    # Parse individual times
+    start_time <- parse_time(time_parts)
+    end_time <- parse_time(time_parts)
+    # Convert seconds since midnight
+    start_seconds <- as.numeric(start_time) %% (24*60*60)
+    end_seconds <- as.numeric(end_time) %% (24*60*60)
+    # Calculate midpoint in seconds
+    midpoint_seconds <- (start_seconds + end_seconds) / 2
+    # Convert midpoint to time object
+    midpoint_time <- as.POSIXct(midpoint_seconds, tz = "UTC")
+    # Format to display time only
+    midpoint_format <- format(midpoint_time, format = "%I:%M %p")
+    return(midpoint_format)
+  } else if (numeric1 | numeric2 == "JWDP"){
+    calculate_midpoint <- function(time_range, format_12h = "I:M p", separator = "to")
+      time_parts <- stringr::str_split(time_range, "to")[]
+    start_time <- parse_time(time_parts)
+    end_time <- parse_time(time_parts)
+    start_seconds <- as.numeric(start_time) %% (24*60*60)
+    end_seconds <- as.numeric(end_time) %% (24*60*60)
+    midpoint_seconds <- (start_seconds + end_seconds) / 2
+    midpoint_time <- as.POSIXct(midpoint_seconds, tz = "UTC")
+    midpoint_format <- format(midpoint_time, format = "%I:%M %p")
+    return(midpoint_format)
+  }
   if (numeric1 | numeric2 != "PWGTP") {
     "Error: Missing Key Numeric Variable PWGTP"
   }
-  if (categorical1 == c("FER", "HHL", "SCH", "SCHL", "SEX")){
+  #cagetorical variable formatting
+  if (categorical1 %in% c("FER", "HHL", "SCH", "SCHL", "SEX")){
     print(categorical1)
   } else {
     "Error: Incorrect categorical variable specified"
   }
-  if (geography == c("REGION", "DIVISION", "ST", "STATE")) {
+  # geographic variable formatting
+  if (geography %in% c("REGION", "DIVISION", "ST", "STATE")) {
     print(geography)
   } else {
     "Error: Incorrect Geography Level"
@@ -156,7 +199,8 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
   } else {
     "Error: Incorrect Geography Subset Specified"
   }
-  }
+
+# coding for URL begins after formatting completed
   result <- httr::GET(paste0("https://api.census.gov/data/",
                              year,
                              "/acs/acs1/pums?get=",
@@ -176,6 +220,22 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
   class(parsed) <- c("census", class(parsed))
   return(dplyr::as_tibble(parsed$data))
 }
+```
+
+Testing the function in various conditions
+```{r}
+key <- "b195a5a7b89af4ff112dcbfe5e6a9eff2102afad"
+
+# Testing defaults
+query_census(key)
+# Testing acceptable years
+# Testing unacceptable years
+# Testing acceptable numeric variables
+# Testing unacceptable numeric variables
+# Testing acceptable categorical variables
+# Testing unacceptable categorical variables
+# Testing acceptable geographic variables
+# Testing unacceptable geographic variables
 ```
 
 ## Combining Years
