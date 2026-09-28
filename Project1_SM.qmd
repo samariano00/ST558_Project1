@@ -285,14 +285,6 @@ query_census()
 # Testing acceptable years
 query_census("2023")
 
-# Testing unacceptable years
-query_census("2026")
-
-# Testing acceptable numeric variables
-# Testing unacceptable numeric variables
-# Testing acceptable categorical variables
-# Testing unacceptable categorical variables
-# Testing acceptable geographic variables
 # Testing unacceptable geographic variables
 ```
 
