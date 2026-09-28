@@ -75,10 +75,32 @@ usual_2021 <- httr::GET("https://api.census.gov/data/2021/acs/acs1/pums?get=SEX,
 # Parse data
 parsed_usual_2021 <- jsonlite::fromJSON(rawToChar(usual_2021$content))
 
+str(parsed_usual_2021)
+
 # Return as a tibble
 tibble_2021 <- dplyr::as_tibble(parsed_usual_2021)
 
 # Print tibble
+tibble_2021
+
+# Column names aren't what they should be in the first tibble.  Fix tibble output so the first row now acts as the column names.
+colnames(tibble_2021) <- tibble_2021[1,]
+tibble_2021 <- tibble_2021[-1,]
+
+# Print tibble
+tibble_2021
+
+# The output variables aren't the appropriate type.  Fix variables so that their type matches the predicate type listed in the variables definition link.
+tibble_2021 <- tibble_2021 |>
+  dplyr::mutate(SEX <- as.factor(SEX),
+                PWGTP <- as.numeric(PWGTP),
+                MAR <- as.factor(MAR),
+                SCHL <- as.factor(SCHL)
+                ) |>
+  dplyr::select(`SEX <- as.factor(SEX)`, `PWGTP <- as.numeric(PWGTP)`, `MAR <- as.factor(MAR)`, `SCHL <- as.factor(SCHL)`) |>
+  dplyr::rename("SEX" = "SEX <- as.factor(SEX)", "PWGTP" = "PWGTP <- as.numeric(PWGTP)", "MAR" = "MAR <- as.factor(MAR)", "SCHL" = "SCHL <- as.factor(SCHL)")
+
+# Print tibble to check output
 tibble_2021
 ```
 
@@ -140,9 +162,12 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
 "JWMNP")) {
     print(numeric2)
   }
-  if (numeric1 | numeric2 %in% c("JWAP", "JWDP") & (is.na(variable_list$JWAP) | is.na(variable_list$JWDP)) == "TRUE" ) {
+  if (is.na(variable_list$JWAP) == "TRUE" ) {
     'NA'
-  } else if (numeric1 | numeric2 == "JWAP"){
+  } else if (is.na(variable_list$JWDP) == "TRUE"){
+    'NA'
+  }
+  else if (numeric1 | numeric2 == "JWAP"){
     calculate_midpoint <- function(time_range, format_12h = "I:M p", separator = "to")
       # Split string into start and end time
       time_parts <- stringr::str_split(time_range, "to")[]
