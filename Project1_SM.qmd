@@ -109,7 +109,18 @@ Create a single function that would combine all three processes above that would
 search_census <- function(URL){
   result <- httr::GET(URL)
   parsed <- jsonlite::fromJSON(rawToChar(result$content))
-  return(dplyr::as_tibble(parsed))
+  tibble_census_test <- dplyr::as_tibble(parsed)
+  colnames(tibble_census_test) <- tibble_census_test[1,]
+  tibble_census_test <- tibble_census_test[-1,]
+  tibble_census_test <- tibble_census_test |>
+    dplyr::mutate(SEX <- as.factor(SEX),
+                PWGTP <- as.numeric(PWGTP),
+                MAR <- as.factor(MAR),
+                SCHL <- as.factor(SCHL)
+                ) |>
+    dplyr::select(`SEX <- as.factor(SEX)`, `PWGTP <- as.numeric(PWGTP)`, `MAR <- as.factor(MAR)`, `SCHL <- as.factor(SCHL)`) |>
+    dplyr::rename("SEX" = "SEX <- as.factor(SEX)", "PWGTP" = "PWGTP <- as.numeric(PWGTP)", "MAR" = "MAR <- as.factor(MAR)", "SCHL" = "SCHL <- as.factor(SCHL)")
+  return(tibble_census_test)
 }
 ```
 
@@ -162,9 +173,9 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
 "JWMNP")) {
     print(numeric2)
   }
-  if (is.na(variable_list$JWAP) == "TRUE" ) {
+  if (is.na(variable_list$JWAP)) {
     'NA'
-  } else if (is.na(variable_list$JWDP) == "TRUE"){
+  } else if (is.na(variable_list$JWDP)){
     'NA'
   }
   else if (numeric1 | numeric2 == "JWAP"){
@@ -242,8 +253,9 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
                              key
   ))
   parsed <- jsonlite::fromJSON(rawToChar(result$content))
+  tibble_census <- dplyr::as_tibble(parsed)
   class(parsed) <- c("census", class(parsed))
-  return(dplyr::as_tibble(parsed$data))
+  return(tibble_census)
 }
 ```
 
