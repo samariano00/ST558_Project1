@@ -132,105 +132,38 @@ search_census(URL_2023)
 ```
 
 Write a function that would query an API while also parsing the values.
+NOTE: the use of * as the geography value calls all items within the geographic value.  To subset to a specific level, you can input a number instead when specifying different inputs with this function.
 ```{r}
 # Call raw data variable file in order to reference in function
 variable_list <- readRDS("data/rawdata_variables.RDS")
 
 # Create function
-query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", categorical1 = "SEX", geography = "STATE", geography_value = "24",key = "b195a5a7b89af4ff112dcbfe5e6a9eff2102afad"){
+query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", categorical1 = "SEX", geography = "ST", geography_value = "*",key = "b195a5a7b89af4ff112dcbfe5e6a9eff2102afad"){
   # year variable formatting
-  if (year %in% c("2021","2022","2023","2024")) {
-    print(year)
-  } else {
-    "Error: Incorrect Year"
-  }
+  ifelse(year %in% c("2021","2022","2023","2024"), print(year), print("Error: Incorrect Year"))
   # numeric variable formatting
-  if (numeric1 %in% c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", 
+  if (numeric1 %in% c("AGEP", "GASP", "GRPIP", 
 "JWMNP","PWGTP")) {
     print(numeric1)
   }
-  if (numeric2 %in% c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", 
+  if (numeric2 %in% c("AGEP", "GASP", "GRPIP", 
 "JWMNP","PWGTP")) {
     print(numeric2)
-  } 
-  for (item in variable_list$JWAP$item){
-    if (is.na(variable_list$JWAP$item)){
-      "NA"
-    } else if (!is.na(variable_list$JWAP$item)){
-      extracted_range <- stringr::str_match(variable_list$JWAP$item, ':')[,2] #Split into individual values following item number
-      #select out N/A values for 0
-      if (extracted_range != "to"){
-        print(extracted_range)
-      } else {calculate_midpoint <- function(extracted_range)
-      # Split string into start and end time
-      time_parts <- stringr::str_split(extracted_range, "to")[]
-    # Parse individual times
-    start_time <- readr::parse_time(time_parts)
-    end_time <- readr::parse_time(time_parts)
-    # Convert seconds since midnight
-    start_seconds <- as.numeric(start_time) %% (24*60*60)
-    end_seconds <- as.numeric(end_time) %% (24*60*60)
-    # Calculate midpoint in seconds
-    midpoint_seconds <- (start_seconds + end_seconds) / 2
-    # Convert midpoint to time object
-    midpoint_time <- as.POSIXct(midpoint_seconds, tz = "UTC")
-    # Format to display time only
-    midpoint_format <- format(midpoint_time, format = "%I:%M %p")
-    return(midpoint_format)
-      }
-    }
   }
-  for (item in variable_list$JWDP$item){
-    if (is.na(variable_list$JWDP$item)){
-      "NA"
-    } else if (!is.na(variable_list$JWDP$item)){
-      extracted_range <- stringr::str_match(variable_list$JWDP$item, ':')[,2] #Split into individual values following item number
-      #select out N/A values for 0
-      if (extracted_range != "to"){
-        print(extracted_range)
-      } else {calculate_midpoint <- function(extracted_range)
-      # Split string into start and end time
-      time_parts <- stringr::str_split(extracted_range, "to")[]
-    # Parse individual times
-    start_time <- readr::parse_time(time_parts)
-    end_time <- readr::parse_time(time_parts)
-    # Convert seconds since midnight
-    start_seconds <- as.numeric(start_time) %% (24*60*60)
-    end_seconds <- as.numeric(end_time) %% (24*60*60)
-    # Calculate midpoint in seconds
-    midpoint_seconds <- (start_seconds + end_seconds) / 2
-    # Convert midpoint to time object
-    midpoint_time <- as.POSIXct(midpoint_seconds, tz = "UTC")
-    # Format to display time only
-    midpoint_format <- format(midpoint_time, format = "%I:%M %p")
-    return(midpoint_format)
-      }
-    }
-  }
-  if ((numeric1 != "PWGTP") | (numeric2 != "PWGTP")){
+  if ((numeric1 != "PWGTP") & (numeric2 != "PWGTP")){
     "Error: Missing Key Numeric Variable PWGTP"
   }
   #categorical variable formatting
-  if (categorical1 %in% c("FER", "HHL", "SCH", "SCHL", "SEX")){
-    print(categorical1)
-  } else {
-    "Error: Incorrect categorical variable specified"
-  }
+  ifelse(categorical1 %in% c("FER", "HHL", "SCH", "SCHL", "SEX"), print(categorical1), print("Error: Incorrect categorical variable specified"))
   # geographic variable formatting
-  if (geography %in% c("REGION", "DIVISION", "ST", "STATE")) {
-    print(geography)
-  } else {
-    "Error: Incorrect Geography Level"
-  }
-  if (geography_value == "all") {
+  ifelse(geography %in% c("REGION", "DIVISION", "ST", "STATE"), print(geography), print("Error: Incorrect Geography Level"))
+  if ((geography == "REGION") & (geography_value %in% variable_list$REGION$values)) {
     print(geography_value)
-  } else if (geography == "REGION" & geography_value %in% variable_list$REGION) {
+  } else if ((geography == "DIVISION") & (geography_value %in% variable_list$DIVISION$values)) {
     print(geography_value)
-  } else if (geography == "DIVISION" & geography_value %in% variable_list$DIVISION) {
+  } else if ((geography == "ST") & (geography_value %in% variable_list$ST$values)) {
     print(geography_value)
-  } else if (geography == "ST" & geography_value %in% variable_list$ST) {
-    print(geography_value)
-  } else if (geography == "STATE" & geography_value %in% variable_list$STATE){
+  } else if ((geography == "STATE") & (geography_value %in% variable_list$STATE$values)){
     print(geography_value)
   } else {
     "Error: Incorrect Geography Subset Specified"
@@ -245,9 +178,9 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
                              numeric2,
                              ",",
                              categorical1,
-                             "&",
+                             "&for",
                              geography,
-                             "=",
+                             ":",
                              geography_value,
                              "&key=",
                              key
@@ -262,16 +195,67 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
                   GASP <- as.numeric(GASP),
                   GRPIP <- as.numeric(GRPIP),
                   JWMNP <- as.numeric(JWMNP),
-                  FER <- factor(FER, 0:2, c( "N/A (less than 15 years/greater than 50 years/ male)", "No", "Yes")
+                  JWAP <- for (item in variable_list$JWAP$values$item){
+    if (is.na(item)){
+      "NA"
+    } else if (!is.na(item)){
+            #select out N/A values for 0
+      if (item != "to"){
+        print(item)
+      } else {calculate_midpoint <- function(item)
+      # Split string into start and end time
+      time_parts <- stringr::str_split(item, "to")[]
+    # Parse individual times
+    start_time <- readr::parse_time(time_parts)
+    end_time <- readr::parse_time(time_parts)
+    # Convert seconds since midnight
+    start_seconds <- as.numeric(start_time) %% (24*60*60)
+    end_seconds <- as.numeric(end_time) %% (24*60*60)
+    # Calculate midpoint in seconds
+    midpoint_seconds <- (start_seconds + end_seconds) / 2
+    # Convert midpoint to time object
+    midpoint_time <- as.POSIXct(midpoint_seconds, tz = "UTC")
+    # Format to display time only
+    midpoint_format <- format(midpoint_time, format = "%I:%M %p")
+    return(midpoint_format)
+      }
+    }
+  },
+                  JWDP <-   for (item in variable_list$JWDP$values$item){
+    if (is.na(item)){
+      "NA"
+    } else if (!is.na(item)){
+      #select out N/A values for 0
+      if (item != "to"){
+        print(item)
+      } else {calculate_midpoint <- function(item)
+      # Split string into start and end time
+      time_parts <- stringr::str_split(item, "to")[]
+    # Parse individual times
+    start_time <- readr::parse_time(time_parts)
+    end_time <- readr::parse_time(time_parts)
+    # Convert seconds since midnight
+    start_seconds <- as.numeric(start_time) %% (24*60*60)
+    end_seconds <- as.numeric(end_time) %% (24*60*60)
+    # Calculate midpoint in seconds
+    midpoint_seconds <- (start_seconds + end_seconds) / 2
+    # Convert midpoint to time object
+    midpoint_time <- as.POSIXct(midpoint_seconds, tz = "UTC")
+    # Format to display time only
+    midpoint_format <- format(midpoint_time, format = "%I:%M %p")
+    return(midpoint_format)
+      }
+    }
+  },
+                  FER <- factor(FER, 0:2, print(variable_list$FER$values$item)
                      ),
-                  SEX <- factor(SEX,1:2, c("Male","Female")
+                  SEX <- factor(SEX, 1:2, print(variable_list$SEX$values$item)
                      ),
-                  SCH <- factor(SCH,0:3, c("N/A (less than 3 years old)", "No, has not attended in the last 3 months", "Yes, public school or public college", "Yes, private school or college or home school")
+                  SCH <- factor(SCH,0:3, print(variable_list$SCH$values$item)
                      ),
-                  SCHL <- factor(SCHL,0:24, c("N/A (less than 3 years old)", "No schooling completed", "Nursery school, preschool", "Kindergarten", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10", "Grade 11", "12th grade - no diploma", "Regular high school diploma", "GED or alternative credential", "Some college, but less than 1 year", "1 or more years of college credit, no degree", "Associate's degree", "Bachelor's degree", "Master's degree", "Professional degree beyond a bachelor's degree", "Doctorate degree")
+                  SCHL <- factor(SCHL,0:24, print(variable_list$SCH$values$item)
                       )
-                ) |>
-    dplyr::rename("PWGTP" = "PWGTP <- as.numeric(PWGTP)", "AGEP" = "AGEP <- as.numeric(AGEP)", "GASP" = "GASP <- as.numeric(GASP)", "GRPIP" = "GRPIP <- as.numeric(GRPIP)", "JWMNP" = "JWMNP <- as.numeric(JWMNP)")
+                )
   class(parsed) <- c("census", class(parsed))
   return(tibble_census)
 }
