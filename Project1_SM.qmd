@@ -138,36 +138,25 @@ NOTE: the use of * as the geography value calls all items within the geographic 
 variable_list <- readRDS("data/rawdata_variables.RDS")
 
 # Create function
-query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", categorical1 = "SEX", geography = "ST", geography_value = "*",key = "b195a5a7b89af4ff112dcbfe5e6a9eff2102afad"){
+query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", geography = "STATE", categorical1 = "SEX"){
   # year variable formatting
-  ifelse(year %in% c("2021","2022","2023","2024"), print(year), print("Error: Incorrect Year"))
+  ifelse(year %in% c("2021","2022","2023","2024"), print(year, quote = FALSE), print("Error: Incorrect Year"))
   # numeric variable formatting
   if (numeric1 %in% c("AGEP", "GASP", "GRPIP", 
 "JWMNP","PWGTP")) {
-    print(numeric1)
+    print(numeric1, quote = FALSE)
   }
   if (numeric2 %in% c("AGEP", "GASP", "GRPIP", 
 "JWMNP","PWGTP")) {
-    print(numeric2)
+    print(numeric2, quote = FALSE)
   }
   if ((numeric1 != "PWGTP") & (numeric2 != "PWGTP")){
     "Error: Missing Key Numeric Variable PWGTP"
   }
   #categorical variable formatting
-  ifelse(categorical1 %in% c("FER", "HHL", "SCH", "SCHL", "SEX"), print(categorical1), print("Error: Incorrect categorical variable specified"))
+  ifelse(categorical1 %in% c("FER", "HHL", "SCH", "SCHL", "SEX"), print(categorical1, quote = FALSE), print("Error: Incorrect categorical variable specified"))
   # geographic variable formatting
-  ifelse(geography %in% c("REGION", "DIVISION", "ST", "STATE"), print(geography), print("Error: Incorrect Geography Level"))
-  if ((geography == "REGION") & (geography_value %in% variable_list$REGION$values)) {
-    print(geography_value)
-  } else if ((geography == "DIVISION") & (geography_value %in% variable_list$DIVISION$values)) {
-    print(geography_value)
-  } else if ((geography == "ST") & (geography_value %in% variable_list$ST$values)) {
-    print(geography_value)
-  } else if ((geography == "STATE") & (geography_value %in% variable_list$STATE$values)){
-    print(geography_value)
-  } else {
-    "Error: Incorrect Geography Subset Specified"
-  }
+  ifelse(geography %in% c("REGION", "DIVISION", "ST", "STATE"), print(geography, quote = FALSE), print("Error: Incorrect Geography Level"))
 
 # coding for URL begins after formatting completed
   result <- httr::GET(paste0("https://api.census.gov/data/",
@@ -176,14 +165,11 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
                              numeric1,
                              ",",
                              numeric2,
-                             ",",
-                             categorical1,
                              "&for",
                              geography,
-                             ":",
-                             geography_value,
-                             "&key=",
-                             key
+                             ":3&",
+                             categorical1,
+                             "&key=b195a5a7b89af4ff112dcbfe5e6a9eff2102afad"
   ))
   parsed <- jsonlite::fromJSON(rawToChar(result$content))
   tibble_census <- dplyr::as_tibble(parsed)
@@ -261,7 +247,8 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
 }
 ```
 
-Testing the function in various conditions
+Testing the function in various conditions. 
+NOTE: add quotations when putting in different values for inputs
 ```{r}
 # Testing defaults
 query_census()
@@ -269,7 +256,8 @@ query_census()
 # Testing acceptable years
 query_census("2023")
 
-# Testing unacceptable geographic variables
+# Testing unacceptable categorical variable
+query_census("2022", "CIT")
 ```
 
 ## Combining Years
