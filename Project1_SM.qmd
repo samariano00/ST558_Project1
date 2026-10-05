@@ -16,8 +16,16 @@ library(stringr)
 ```
 
 # Part 1: Data Processing
+Because the U.S. is such a large and quickly changing country, we want to look at census data to get an idea of how quickly changes have occurred throughout different parts of the U.S. within the past 2-5 years.  In order to investigate census data, we can create several functions that would allow us to look at and investigate pseudo person-level data through the Public Use Microdata Sample (PUMS) Census.
+
+To access the PUMS census data, we will need APIs that would help us to pull information into R and allow us to investigate the data in a programming language that we know.
+
+Before getting to the data itself, we will need to investigate what type of census data is available from 2021-2024 and pull in the variables that are of interest to us.  In our case, we will want to look at data including people's ages, whether or not they have had a child in the past year, their monthly gas prices, a relative proportion of their monthly household income goes towards paying rent, what language is spoken in their household, times they arrive and leave work, length of their commute, how many people there may be in a particular row of our data, whether or not they are currently enrolled in school, what level of education they have, and what region/ state of the U.S. they currently live in.
+
+Knowing what information we want for each year, we're going to begin by pulling in variable lists from each indivual year:
+
 ## Parsing Variable Values
-Create list for 2021
+Create variable list for 2021:
 ```{r}
 # Read in raw 2021 data
 data_2021 <- httr::GET("https://api.census.gov/data/2021/acs/acs1/pums/variables.json")
@@ -27,7 +35,7 @@ parsed_2021 <- jsonlite::fromJSON(rawToChar(data_2021$content))
 variables_2021 <- parsed_2021$variables[c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER", "HHL", "SCH", "SCHL", "SEX", "ST", "REGION", "DIVISION")]
 ```
 
-Create list for 2022
+Create variable list for 2022:
 ```{r}
 # Read in raw 2022 data
 data_2022 <- httr::GET("https://api.census.gov/data/2022/acs/acs1/pums/variables.json")
@@ -37,7 +45,7 @@ parsed_2022 <- jsonlite::fromJSON(rawToChar(data_2022$content))
 variables_2022 <- parsed_2022$variables[c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER", "HHL", "SCH", "SCHL", "SEX", "ST", "REGION", "DIVISION")]
 ```
 
-Create list for 2023
+Create variable list for 2023:
 ```{r}
 # Read in raw 2023 data
 data_2023 <- httr::GET("https://api.census.gov/data/2023/acs/acs1/pums/variables.json")
@@ -47,7 +55,7 @@ parsed_2023 <- jsonlite::fromJSON(rawToChar(data_2023$content))
 variables_2023 <- parsed_2023$variables[c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER", "HHL", "SCH", "SCHL", "SEX", "STATE", "REGION", "DIVISION")]
 ```
 
-Create list for 2024
+Create variable list for 2024:
 ```{r}
 # Read in raw 2024 data
 data_2024 <- httr::GET("https://api.census.gov/data/2024/acs/acs1/pums/variables.json")
@@ -57,7 +65,7 @@ parsed_2024 <- jsonlite::fromJSON(rawToChar(data_2024$content))
 variables_2024 <- parsed_2024$variables[c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER", "HHL", "SCH", "SCHL", "SEX", "STATE", "REGION", "DIVISION")]
 ```
 
-Combine individual year variable lists into a single RDS file
+Now that all individual year variable lists have been created, we will want to combine them into a single RDS file (R studio data file) that we can reference later on when creating our functions:
 ```{r}
 # Save all individual year variable lists into a single list
 combined_variables <- c(variables_2021, variables_2022, variables_2023, variables_2024)
@@ -67,7 +75,7 @@ saveRDS(combined_variables, file = "data/rawdata_variables.RDS")
 ```
 
 ## Parsing API Data
-Using usual coding practice, query API and return a tibble.  Data from 2021 used for this example.
+Looking at our previous R experience, we can start by using our usual coding practices as a template to query an API and return a tibble of the data that we want.  In this case, we're going to practice using some data from 2021.
 ```{r}
 # Read-in URL
 usual_2021 <- httr::GET("https://api.census.gov/data/2021/acs/acs1/pums?get=SEX,PWGTP,MAR&SCHL=24&key=b195a5a7b89af4ff112dcbfe5e6a9eff2102afad")
@@ -81,14 +89,14 @@ tibble_2021 <- dplyr::as_tibble(parsed_usual_2021)
 # Print tibble
 tibble_2021
 
-# Column names aren't what they should be in the first tibble.  Fix tibble output so the first row now acts as the column names.
+# The column names aren't what they should be in the first tibble.  We're going to modify the tibble output so that the first row now acts as the column names.
 colnames(tibble_2021) <- tibble_2021[1,]
 tibble_2021 <- tibble_2021[-1,]
 
 # Print tibble
 tibble_2021
 
-# The output variables aren't the appropriate type.  Fix variables so that their type matches the predicate type listed in the variables definition link.
+# The output variables aren't the appropriate type for the type of data analysis we want to do further down the line.  We're going to fix variables so that their type matches the predicate type listed in the variables definition link.
 tibble_2021 <- tibble_2021 |>
     dplyr::mutate(SEX <- as.factor(SEX),
                 PWGTP <- as.numeric(PWGTP),
@@ -100,9 +108,11 @@ tibble_2021 <- tibble_2021 |>
 
 # Print tibble to check output
 tibble_2021
+
+# The final tibble looks to have the correct column names and variable types for the data analysis we want to do further down the road.
 ```
 
-Create a single function that would combine all three processes above that would directly return a given URL as a tibble
+Since our usual process is now working as we'd like, we will start by creating a single function to combine all of the processes that we went through in the previous coding block to allow us to directly input our URL of choice and get a tibble with the data we want as a result.
 ```{r}
 search_census <- function(URL){
   result <- httr::GET(URL)
@@ -122,7 +132,7 @@ search_census <- function(URL){
 }
 ```
 
-Test function using example data from 2023.
+In order to test the function we just created above, we're going to use an example link from 2023.
 ```{r}
 # Set URL variable with example data 
 URL_2023 <- "https://api.census.gov/data/2023/acs/acs1/pums?get=SEX,PWGTP,MAR&SCHL=20&key=b195a5a7b89af4ff112dcbfe5e6a9eff2102afad"
@@ -131,14 +141,20 @@ URL_2023 <- "https://api.census.gov/data/2023/acs/acs1/pums?get=SEX,PWGTP,MAR&SC
 search_census(URL_2023)
 ```
 
-Write a function that would query an API while also parsing the values.
-NOTE: the use of * as the geography value calls all items within the geographic value.  To subset to a specific level, you can input a number instead when specifying different inputs with this function.
+Since our first round of creating a function that would allow for inputting a URL and getting a tibble back worked well, we're going to now work on creating a function that would allow us to specify the variables that we want to look at and parse (clean) the values and output a tibble that contains the information we want to look at in the variable formatting that we can use to perform different analyses further down the line.
+
+
+
+NOTE: the use of * as the geography value calls all items within the geographic value.  To subset to a specific level, you can input a number instead when specifying different inputs with this function. (you must use the formatting in the available values portion for each geography level)
+Available values for region: 1-4, 9
+Available values for division: 0-9
+Available values for st (years 2021-2022) or state (years 2023-2024): 01-02, 04-06, 08-13, 15-42, 44-51, 53-56, 72
 ```{r}
 # Call raw data variable file in order to reference in function
 variable_list <- readRDS("data/rawdata_variables.RDS")
 
 # Create function
-query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", geography = "STATE", categorical1 = "SEX"){
+query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", categorical1 = "SEX", geography = "STATE", geography_value = "24"){
   # year variable formatting
   ifelse(year %in% c("2021","2022","2023","2024"), print(year, quote = FALSE), print("Error: Incorrect Year"))
   # numeric variable formatting
@@ -157,6 +173,11 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", g
   ifelse(categorical1 %in% c("FER", "HHL", "SCH", "SCHL", "SEX"), print(categorical1, quote = FALSE), print("Error: Incorrect categorical variable specified"))
   # geographic variable formatting
   ifelse(geography %in% c("REGION", "DIVISION", "ST", "STATE"), print(geography, quote = FALSE), print("Error: Incorrect Geography Level"))
+    if (geography_value == "*"){ 
+    print(geography_value, quote = FALSE)
+  } else if (((geography == "REGION") & (geography_value %in% variable_list$REGION$values$item)) | ((geography == "DIVISION") & (geography_value %in% variable_list$DIVISION$values$item)) | ((geography == "ST") & (geography_value %in% variable_list$ST$values$item)) | ((geography == "STATE") & (geography_value %in% variable_list$STATE$values$item))){
+    print(geography_value, quote = FALSE)
+    } else {print("Error: Incorrect Geography Subset Specified")}
 
 # coding for URL begins after formatting completed
   result <- httr::GET(paste0("https://api.census.gov/data/",
@@ -165,10 +186,12 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", g
                              numeric1,
                              ",",
                              numeric2,
+                             ",",
+                             categorical1,
                              "&for",
                              geography,
-                             ":3&",
-                             categorical1,
+                             ":",
+                             geography_value,
                              "&key=b195a5a7b89af4ff112dcbfe5e6a9eff2102afad"
   ))
   parsed <- jsonlite::fromJSON(rawToChar(result$content))
