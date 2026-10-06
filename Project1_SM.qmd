@@ -310,6 +310,22 @@ census_all
 ```
 
 # Part 2: Writing a Generic Function for Summarizing
+Now that we have a function that would allow us to customize which variables we call in from which year(s) we want, now we can shift our focus to creating a function that would allow us to summarize these results at one time.
+
 ## Generic Functions
+In order to create a function that would allow us to summarize results, we want to know first how generic functions operate.  The code below should help us to look at how a function like plot works.
+```{r}
+plot.function
+getS3method("plot","data.frame")
+```
+Now that we have an idea of what arguments a generic function like plot would need in order get a proper output, we can start to create our own summary function.
+In the 2nd to last line of our function to parse API data as it's read in, we assigned our output's class to "census".  This was to help us in this step of writing a summary function.
+```{r}
+
+```
+
 ## Numeric Summaries
+As part of our analysis of census data, we'd like to create numeric summaries for all variables regardless of whether or not it's numeric or categorical.  For the numeric variables, we can generate mean and standard deviation numeric summaries and for our categorical variables, our numeric summaries will be counts/ data point frequencies.
+
 ## Graphical Summaries
+The final part of analyzing our census data would be to create a function whose output would be a graph.  Given that we would get the most of looking at both numeric and categorical data at the same time, we'll create boxplots that look at the behavior of the numeric variable at any given level of a categorical variable.
