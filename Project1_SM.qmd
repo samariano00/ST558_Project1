@@ -256,7 +256,7 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
       }
     }
   }
-  },
+                  },
                   if(categorical1 == "FER") {FER <- factor(FER, 0:2, print(variable_list$FER$values$item))},
                   if(categorical1 == "SEX") {SEX <- factor(SEX, 1:2, print(variable_list$SEX$values$item))},
                   if(categorical1 == "SCH") {SCH <- factor(SCH, 0:3, print(variable_list$SCH$values$item))},
@@ -285,11 +285,24 @@ Since all of the outputs are working as we'd like them to, we can move forward w
 ## Combining Years
 If we want to search for multiple years at once, we're going to have to slightly modify the function above:
 ```{r}
-,
-                  if (geography == "REGION") {REGION <- factor(region,1:4, print(variable_list$REGION$values$item))},
-                  if (geography == "DIVISION") {DIVISION <- factor(division, 1:9, print(variable_list$DIVISION$values$item))},
-                  if (geography == "ST") {ST <- factor(st, levels = c(01:02, 04:06, 08:13, 15:42, 44:51, 53:56, 72), labels = print(variable_list$ST$values$item))},
-                  if (geography == "STATE") {STATE <- factor(state, levels = c(01:02, 04:06, 08:13, 15:42, 44:51, 53:56, 72), labels = print(variable_list$STATE$values$item))}
+# First, we should save the results of each function for all of our individual years.  Because we'll be combining multiple years, we're going to add a "years" column that would allow us to trace back which year we're pulling data from (called year).  For simplicity, we're going to switch our geography variable to region and set it's value at 4 (West)
+census_2021 <- query_census(year = "2021", geography = "REGION", geography_value = "4")
+census_2021$year <- "2021"
+
+census_2022 <- query_census(year = "2022", geography = "REGION", geography_value = "4")
+census_2022$year <- "2022"
+
+census_2023 <- query_census(year = "2023", geography = "REGION", geography_value = "4")
+census_2023$year <- "2023"
+
+census_2024 <- query_census(year = "2024", geography = "REGION", geography_value = "4")
+census_2024$year <- "2024"
+
+# Now we need to combine this data into a single final tibble that we can call census_all
+census_all <- dplyr::bind_rows(census_2021, census_2022, census_2023, census_2024)
+
+# Look at the results:
+census_all
 ```
 
 # Part 2: Writing a Generic Function for Summarizing
