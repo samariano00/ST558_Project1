@@ -197,8 +197,8 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
   colnames(tibble_census) <- tibble_census[1,]
   tibble_census <- tibble_census[-1,]
   tibble_census <- tibble_census |>
-    dplyr::mutate(PWGTP <- as.numeric(PWGTP),
-                  if((numeric1 == "AGEP") | (numeric2 == "AGEP")){AGEP <- as.numeric(AGEP)}
+    dplyr::mutate(if ((numeric1 == "PWGTP") | (numeric2 == "PWGTP")) {PWGTP <- as.numeric(PWGTP)}
+                  else if((numeric1 == "AGEP") | (numeric2 == "AGEP")){AGEP <- as.numeric(AGEP)}
                   else if((numeric1 == "GASP") | (numeric2 == "GASP")) {GASP <- as.numeric(GASP)}
                   else if((numeric1 == "GRPIP") | (numeric2 == "GRPIP")) {GRPIP <- as.numeric(GRPIP)}
                   else if((numeric1 == "JWMNP") | (numeric2 == "JWMNP")) {JWMNP <- as.numeric(JWMNP)}
@@ -256,14 +256,14 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
     }
   }
   },
-                  if(categorical1 == "FER") {FER <- factor(FER, 0:2, labels = variable_list$FER$values$item)}
-                  else if(categorical1 == "SEX") {SEX <- factor(SEX, 1:2, labels = variable_list$SEX$values$item)}
-                  else if(categorical1 == "SCH") {SCH <- factor(SCH, 0:3, labels = variable_list$SCH$values$item)}
-                  else if(categorical1 == "SCHL") {SCHL <- factor(SCHL, 0:24, labels = variable_list$SCH$values$item)},
-                  if (geography == "REGION") {REGION <- factor(region, c(1:4, 9), labels = variable_list$REGION$values$item)}
-                  else if (geography == "DIVISION") {DIVISION <- factor(division, 0:9, labels = variable_list$DIVISION$values$item)}
-                  else if (geography == "ST") {ST <- factor(st, c(01:02, 04:06, 08:13, 15:42, 44:51, 53:56, 72), labels = variable_list$ST$values$item)}
-                  else if (geography == "STATE") {STATE <- factor(state, c(01:02, 04:06, 08:13, 15:42, 44:51, 53:56, 72), labels = variable_list$STATE$values$item)}
+                  if(categorical1 == "FER") {FER <- factor(FER, 0:2, labels = print(variable_list$FER$values$item))}
+                  else if(categorical1 == "SEX") {SEX <- factor(SEX, 1:2, labels = print(variable_list$SEX$values$item))}
+                  else if(categorical1 == "SCH") {SCH <- factor(SCH, 0:3, labels = print(variable_list$SCH$values$item))}
+                  else if(categorical1 == "SCHL") {SCHL <- factor(SCHL, 0:24, labels = print(variable_list$SCH$values$item))},
+                  if (geography == "REGION") {REGION <- factor(region, c(1:4, 9), labels = print(variable_list$REGION$values$item))}
+                  else if (geography == "DIVISION") {DIVISION <- factor(division, 0:9, labels = print(variable_list$DIVISION$values$item))}
+                  else if (geography == "ST") {ST <- factor(st, c(01:02, 04:06, 08:13, 15:42, 44:51, 53:56, 72), labels = print(variable_list$ST$values$item))}
+                  else if (geography == "STATE") {STATE <- factor(state, c(01:02, 04:06, 08:13, 15:42, 44:51, 53:56, 72), labels = print(variable_list$STATE$values$item))}
     ) |>
     dplyr::select(-where(is.character))
   class(tibble_census) <- c("census", class(tibble_census))
