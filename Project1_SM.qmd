@@ -2,6 +2,7 @@
 title: "Project1_SM"
 author: "Sofia Mariano"
 date: "30 Sept. 2026"
+purpose: "Complete ST558 Project 1"
 format: html
 editor: visual
 ---
@@ -156,12 +157,10 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
   # year variable formatting
   ifelse(year %in% c("2021","2022","2023","2024"), print(year, quote = FALSE), print("Error: Incorrect Year"))
   # numeric variable formatting
-  if (numeric1 %in% c("AGEP", "GASP", "GRPIP", 
-"JWMNP","PWGTP")) {
+  if (numeric1 %in% c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP","PWGTP")) {
     print(numeric1, quote = FALSE)
   }
-  if (numeric2 %in% c("AGEP", "GASP", "GRPIP", 
-"JWMNP","PWGTP")) {
+  if (numeric2 %in% c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP","PWGTP")) {
     print(numeric2, quote = FALSE)
   }
   if ((numeric1 != "PWGTP") & (numeric2 != "PWGTP")){
@@ -210,6 +209,7 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
       if (item != "to"){
         print(item)
       } else {calculate_midpoint <- function(item)
+        # The code parsing the time data strings for the JWAP and JWDP to find the midpoint was from the Ecosia AI model
       # Split string into start and end time
       time_parts <- stringr::str_split(item, "to")[]
     # Parse individual times
@@ -271,14 +271,14 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
 }
 ```
 
-Testing the function in various conditions. 
-NOTE: add quotations when putting in different values for inputs
+To make sure our function is working as intended, we're going to test it in various conditions. 
+NOTE: add quotations when putting in different values for inputs and detail which identifier (year, geography, etc) is being modified.
 ```{r}
 # Testing defaults
 query_census()
 
 # Testing acceptable years
-query_census(year = "2023")
+query_census(year = "2023", geography = "DIVISION", geography_value = "3")
 
 # Testing unacceptable categorical variable
 query_census(year = "2022", categorical1 = "CIT")
@@ -329,3 +329,11 @@ As part of our analysis of census data, we'd like to create numeric summaries fo
 
 ## Graphical Summaries
 The final part of analyzing our census data would be to create a function whose output would be a graph.  Given that we would get the most of looking at both numeric and categorical data at the same time, we'll create boxplots that look at the behavior of the numeric variable at any given level of a categorical variable.
+
+# Explanation
+I'm really sorry that I wasn't able to complete all of the demands detailed by the project.  When I got to creating a function that parsed values as they were read-in, I wasn't able to create the output in a way that I thought was being described in the project (a tibble with numeric and categorical/ factor variables with the appropriate items/ text in each row, not all character variables as the variables were when read-in).  Since this function is referenced in the remainder of the project, I didn't think that it would have been worth while to attempt to code for the following portions without having completed the API Parsing function to that standard.  I tried looking for different solutions in our source materials and online, but in the end I wasn't able to troubleshoot the code in a way that gave the output that was desired when different conditions were set.
+
+Per the project's instructions, I tried to create as much of the narrative as I could have without interpreting the results that would have been shown in the numeric and graphical summary portions of the project.
+
+Thank you,
+Sofia
