@@ -103,7 +103,7 @@ tibble_2021 <- tibble_2021 |>
                 MAR <- as.factor(MAR),
                 SCHL <- as.factor(SCHL)
                 ) |>
-    dplyr::select(`SEX <- as.factor(SEX)`, `PWGTP <- as.numeric(PWGTP)`, `MAR <- as.factor(MAR)`, `SCHL <- as.factor(SCHL)`) |>
+    dplyr::select(-where(is.character)) |>
     dplyr::rename("SEX" = "SEX <- as.factor(SEX)", "PWGTP" = "PWGTP <- as.numeric(PWGTP)", "MAR" = "MAR <- as.factor(MAR)", "SCHL" = "SCHL <- as.factor(SCHL)")
 
 # Print tibble to check output
@@ -126,7 +126,7 @@ search_census <- function(URL){
                 MAR <- as.factor(MAR),
                 SCHL <- as.factor(SCHL)
                 ) |>
-    dplyr::select(`SEX <- as.factor(SEX)`, `PWGTP <- as.numeric(PWGTP)`, `MAR <- as.factor(MAR)`, `SCHL <- as.factor(SCHL)`) |>
+    dplyr::select(-where(is.character)) |>
     dplyr::rename("SEX" = "SEX <- as.factor(SEX)", "PWGTP" = "PWGTP <- as.numeric(PWGTP)", "MAR" = "MAR <- as.factor(MAR)", "SCHL" = "SCHL <- as.factor(SCHL)")
   return(tibble_census_test)
 }
@@ -173,7 +173,7 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
   ifelse(geography %in% c("REGION", "DIVISION", "ST", "STATE"), print(geography, quote = FALSE), print("Error: Incorrect Geography Level"))
     if (geography_value == "*"){ 
     print(geography_value, quote = FALSE)
-  } else if (((geography == "REGION") & (geography_value %in% c("1", "2", "3", "4"))) | ((geography == "DIVISION") & (geography_value %in% c("1", "2", "3", "4", "5", "6", "7", "8", "9"))) | ((geography == "ST") & (geography_value %in% c("01", "02", "04", "05", "06", "08", "09", "10", "11", "12", "13", "15", "16", "17", "18", "19", "20","21", "22", "23", "24","25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "44", "45", "46", "47", "48","49", "50", "51", "53", "54", "55", "56", "72"))) | ((geography == "STATE") & (geography_value %in% c("01", "02", "04", "05", "06", "08","09", "10", "11", "12", "13", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "44", "45", "46", "47", "48", "49", "50", "51", "53", "54", "55", "56", "72")))){
+  } else if (((geography == "REGION") & (geography_value %in% c("1", "2", "3", "4", "9"))) | ((geography == "DIVISION") & (geography_value %in% c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"))) | ((geography == "ST") & (geography_value %in% c("01", "02", "04", "05", "06", "08", "09", "10", "11", "12", "13", "15", "16", "17", "18", "19", "20","21", "22", "23", "24","25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "44", "45", "46", "47", "48","49", "50", "51", "53", "54", "55", "56", "72"))) | ((geography == "STATE") & (geography_value %in% c("01", "02", "04", "05", "06", "08","09", "10", "11", "12", "13", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "44", "45", "46", "47", "48", "49", "50", "51", "53", "54", "55", "56", "72")))){
     print(geography_value, quote = FALSE)
     } else {print("Error: Incorrect Geography Subset Specified")}
 
@@ -198,12 +198,11 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
   tibble_census <- tibble_census[-1,]
   tibble_census <- tibble_census |>
     dplyr::mutate(PWGTP <- as.numeric(PWGTP),
-                  if(numeric1 == "AGEP") {AGEP <- as.numeric(AGEP)},
-                  if (numeric2 == "AGEP") {AGEP <- as.numeric(AGEP)},
-                  if((numeric1 == "GASP") | (numeric2 == "GASP")) {GASP <- as.numeric(GASP)},
-                  if((numeric1 == "GRPIP") | (numeric2 == "GRPIP")) {GRPIP <- as.numeric(GRPIP)},
-                  if((numeric1 == "JWMNP") | (numeric2 == "JWMNP")) {JWMNP <- as.numeric(JWMNP)},
-                  if((numeric1 == "JWAP") | (numeric2 == "JWAP")) {JWAP <- for (item in variable_list$JWAP$values$item){
+                  if((numeric1 == "AGEP") | (numeric2 == "AGEP")){AGEP <- as.numeric(AGEP)}
+                  else if((numeric1 == "GASP") | (numeric2 == "GASP")) {GASP <- as.numeric(GASP)}
+                  else if((numeric1 == "GRPIP") | (numeric2 == "GRPIP")) {GRPIP <- as.numeric(GRPIP)}
+                  else if((numeric1 == "JWMNP") | (numeric2 == "JWMNP")) {JWMNP <- as.numeric(JWMNP)}
+                  else if((numeric1 == "JWAP") | (numeric2 == "JWAP")) {JWAP <- for (item in variable_list$JWAP$values$item){
     if (is.na(item)){
       "NA"
     } else if (!is.na(item)){
@@ -229,8 +228,8 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
       }
     }
   }
-                  },
-                  if((numeric1 == "JWDP") | (numeric2 == "JWDP")) {JWDP <- for (item in variable_list$JWDP$values$item){
+                  }
+                  else if((numeric1 == "JWDP") | (numeric2 == "JWDP")) {JWDP <- for (item in variable_list$JWDP$values$item){
     if (is.na(item)){
       "NA"
     } else if (!is.na(item)){
@@ -256,12 +255,17 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
       }
     }
   }
-                  },
-                  if(categorical1 == "FER") {FER <- factor(FER, 0:2, print(variable_list$FER$values$item))},
-                  if(categorical1 == "SEX") {SEX <- factor(SEX, 1:2, print(variable_list$SEX$values$item))},
-                  if(categorical1 == "SCH") {SCH <- factor(SCH, 0:3, print(variable_list$SCH$values$item))},
-                  if(categorical1 == "SCHL") {SCHL <- factor(SCHL, 0:24, print(variable_list$SCH$values$item))}
-    )
+  },
+                  if(categorical1 == "FER") {FER <- factor(FER, 0:2, labels = variable_list$FER$values$item)}
+                  else if(categorical1 == "SEX") {SEX <- factor(SEX, 1:2, labels = variable_list$SEX$values$item)}
+                  else if(categorical1 == "SCH") {SCH <- factor(SCH, 0:3, labels = variable_list$SCH$values$item)}
+                  else if(categorical1 == "SCHL") {SCHL <- factor(SCHL, 0:24, labels = variable_list$SCH$values$item)},
+                  if (geography == "REGION") {REGION <- factor(region, c(1:4, 9), labels = variable_list$REGION$values$item)}
+                  else if (geography == "DIVISION") {DIVISION <- factor(division, 0:9, labels = variable_list$DIVISION$values$item)}
+                  else if (geography == "ST") {ST <- factor(st, c(01:02, 04:06, 08:13, 15:42, 44:51, 53:56, 72), labels = variable_list$ST$values$item)}
+                  else if (geography == "STATE") {STATE <- factor(state, c(01:02, 04:06, 08:13, 15:42, 44:51, 53:56, 72), labels = variable_list$STATE$values$item)}
+    ) |>
+    dplyr::select(-where(is.character))
   class(tibble_census) <- c("census", class(tibble_census))
   return(tibble_census)
 }
