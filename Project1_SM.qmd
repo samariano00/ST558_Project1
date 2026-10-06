@@ -20,9 +20,9 @@ Because the U.S. is such a large and quickly changing country, we want to look a
 
 To access the PUMS census data, we will need APIs that would help us to pull information into R and allow us to investigate the data in a programming language that we know.
 
-Before getting to the data itself, we will need to investigate what type of census data is available from 2021-2024 and pull in the variables that are of interest to us.  In our case, we will want to look at data including people's ages, whether or not they have had a child in the past year, their monthly gas prices, a relative proportion of their monthly household income goes towards paying rent, what language is spoken in their household, times they arrive and leave work, length of their commute, how many people there may be in a particular row of our data, whether or not they are currently enrolled in school, what level of education they have, and what region/ state of the U.S. they currently live in.
+Before getting to the data itself, we will need to investigate what type of census data is available from 2021-2024 and pull in the variables that are of interest to us.  In our case, we will want to look at data including people's ages (AGEP), whether or not they have had a child in the past year(FER), their monthly gas prices (GASP), a relative proportion of their monthly household income goes towards paying rent (GRPIP), what language is spoken in their household (HHL), times they arrive and leave work(JWAP and JWDP), length of their commute (JWMNP), how many people there may be in a particular row of our data (PWGTP), whether or not they are currently enrolled in school (SCH), what level of education they have (SCHL), and what region/ state of the U.S. they currently live in (REGION, DIVISION, ST, or STATE).
 
-Knowing what information we want for each year, we're going to begin by pulling in variable lists from each indivual year:
+Knowing what information we want for each year, we're going to begin by pulling in variable lists from each individual year:
 
 ## Parsing Variable Values
 Create variable list for 2021:
@@ -143,9 +143,7 @@ search_census(URL_2023)
 
 Since our first round of creating a function that would allow for inputting a URL and getting a tibble back worked well, we're going to now work on creating a function that would allow us to specify the variables that we want to look at and parse (clean) the values and output a tibble that contains the information we want to look at in the variable formatting that we can use to perform different analyses further down the line.
 
-
-
-NOTE: the use of * as the geography value calls all items within the geographic value.  To subset to a specific level, you can input a number instead when specifying different inputs with this function. (you must use the formatting in the available values portion for each geography level)
+NOTE: the use of * as the geography value calls all items within the geographic value.  To subset to a specific level, you can input a number instead when specifying different inputs with this function. (you must use the formatting in the available values portion for each geography level):
 Available values for region: 1-4
 Available values for division: 1-9
 Available values for st (years 2021-2022) or state (years 2023-2024): 01-02, 04-06, 08-13, 15-42, 44-51, 53-56
@@ -175,7 +173,7 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
   ifelse(geography %in% c("REGION", "DIVISION", "ST", "STATE"), print(geography, quote = FALSE), print("Error: Incorrect Geography Level"))
     if (geography_value == "*"){ 
     print(geography_value, quote = FALSE)
-  } else if (((geography == "REGION") & (geography_value %in% c("1", "2", "3", "4"))) | ((geography == "DIVISION") & (geography_value %in% c("1", "2", "3", "4", "5", "6", "7", "8", "9"))) | ((geography == "ST") & (geography_value %in% c("01", "02", "04", "05", "06", "08", "09", "10", "11", "12", "13", "15", "16", "17", "18", "19", "20","21", "22", "23", "24","25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "44", "45", "46", "47", "48","49", "50", "51", "53", "54", "55", "56"))) | ((geography == "STATE") & (geography_value %in% c("01", "02", "04", "05", "06", "08","09", "10", "11", "12", "13", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "44", "45", "46", "47", "48", "49", "50", "51", "53", "54", "55", "56")))){
+  } else if (((geography == "REGION") & (geography_value %in% c("1", "2", "3", "4"))) | ((geography == "DIVISION") & (geography_value %in% c("1", "2", "3", "4", "5", "6", "7", "8", "9"))) | ((geography == "ST") & (geography_value %in% c("01", "02", "04", "05", "06", "08", "09", "10", "11", "12", "13", "15", "16", "17", "18", "19", "20","21", "22", "23", "24","25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "44", "45", "46", "47", "48","49", "50", "51", "53", "54", "55", "56", "72"))) | ((geography == "STATE") & (geography_value %in% c("01", "02", "04", "05", "06", "08","09", "10", "11", "12", "13", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "44", "45", "46", "47", "48", "49", "50", "51", "53", "54", "55", "56", "72")))){
     print(geography_value, quote = FALSE)
     } else {print("Error: Incorrect Geography Subset Specified")}
 
@@ -200,12 +198,12 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
   tibble_census <- tibble_census[-1,]
   tibble_census <- tibble_census |>
     dplyr::mutate(PWGTP <- as.numeric(PWGTP),
-                  if ((numeric1 == "AGEP") | (numeric2 == "AGEP")) {AGEP <- as.numeric(AGEP)
-                  } else {next},
-                  if ((numeric1 == "GASP") | (numeric2 == "GASP")) {GASP <- as.numeric(GASP)} else {next},
-                  if ((numeric1 == "GRPIP") | (numeric2 == "GRPIP")) {GRPIP <- as.numeric(GRPIP)} else {next},
-                  if ((numeric1 == "JWMNP") | (numeric2 == "JWMNP")) {JWMNP <- as.numeric(JWMNP)} else {next},
-                  if ((numeric1 == "JWAP") | (numeric2 == "JWAP")) {JWAP <- for (item in variable_list$JWAP$values$item){
+                  if(numeric1 == "AGEP") {AGEP <- as.numeric(AGEP)},
+                  if (numeric2 == "AGEP") {AGEP <- as.numeric(AGEP)},
+                  if((numeric1 == "GASP") | (numeric2 == "GASP")) {GASP <- as.numeric(GASP)},
+                  if((numeric1 == "GRPIP") | (numeric2 == "GRPIP")) {GRPIP <- as.numeric(GRPIP)},
+                  if((numeric1 == "JWMNP") | (numeric2 == "JWMNP")) {JWMNP <- as.numeric(JWMNP)},
+                  if((numeric1 == "JWAP") | (numeric2 == "JWAP")) {JWAP <- for (item in variable_list$JWAP$values$item){
     if (is.na(item)){
       "NA"
     } else if (!is.na(item)){
@@ -231,8 +229,8 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
       }
     }
   }
-                  } else {next},
-                  if ((numeric1 == "JWDP") | (numeric2 == "JWDP")) {JWDP <-   for (item in variable_list$JWDP$values$item){
+                  },
+                  if((numeric1 == "JWDP") | (numeric2 == "JWDP")) {JWDP <- for (item in variable_list$JWDP$values$item){
     if (is.na(item)){
       "NA"
     } else if (!is.na(item)){
@@ -258,16 +256,13 @@ query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", c
       }
     }
   }
-                  } else {next},
-                  if (categorical1 == "FER") {FER <- factor(FER, 0:2, print(variable_list$FER$values$item)
-                     )} else {next},
-                  if (categorical1 == "SEX") {SEX <- factor(SEX, 1:2, print(variable_list$SEX$values$item)
-                     )} else {next},
-                  if (categorical1 == "SCH") {SCH <- factor(SCH,0:3, print(variable_list$SCH$values$item)
-                     )} else {next},
-                  if (categorical1 == "SCHL") {SCHL <- factor(SCHL,0:24, print(variable_list$SCH$values$item))} else {next}
-                      )
-  class(parsed) <- c("census", class(parsed))
+  },
+                  if(categorical1 == "FER") {FER <- factor(FER, 0:2, print(variable_list$FER$values$item))},
+                  if(categorical1 == "SEX") {SEX <- factor(SEX, 1:2, print(variable_list$SEX$values$item))},
+                  if(categorical1 == "SCH") {SCH <- factor(SCH, 0:3, print(variable_list$SCH$values$item))},
+                  if(categorical1 == "SCHL") {SCHL <- factor(SCHL, 0:24, print(variable_list$SCH$values$item))}
+    )
+  class(tibble_census) <- c("census", class(tibble_census))
   return(tibble_census)
 }
 ```
@@ -279,63 +274,24 @@ NOTE: add quotations when putting in different values for inputs
 query_census()
 
 # Testing acceptable years
-query_census("2023")
+query_census(year = "2023")
 
 # Testing unacceptable categorical variable
-query_census("2022", "CIT")
+query_census(year = "2022", categorical1 = "CIT")
 ```
 
-```{r}
-# Call raw data variable file in order to reference in function
-variable_list <- readRDS("data/rawdata_variables.RDS")
-
-# Create function
-query_census <- function(year = "2024", numeric1 = "PWGTP", numeric2 = "AGEP", categorical1 = "SEX", geography = "STATE", geography_value = "06"){
-  # year variable formatting
-  ifelse(year %in% c("2021","2022","2023","2024"), print(year, quote = FALSE), print("Error: Incorrect Year"))
-  # numeric variable formatting
-  if (numeric1 %in% c("AGEP", "GASP", "GRPIP", 
-"JWMNP","PWGTP")) {
-    print(numeric1, quote = FALSE)
-  }
-  if (numeric2 %in% c("AGEP", "GASP", "GRPIP", 
-"JWMNP","PWGTP")) {
-    print(numeric2, quote = FALSE)
-  }
-  if ((numeric1 != "PWGTP") & (numeric2 != "PWGTP")){
-    "Error: Missing Key Numeric Variable PWGTP"
-  }
-  #categorical variable formatting
-  ifelse(categorical1 %in% c("FER", "HHL", "SCH", "SCHL", "SEX"), print(categorical1, quote = FALSE), print("Error: Incorrect categorical variable specified"))
-  # geographic variable formatting
-  ifelse(geography %in% c("REGION", "DIVISION", "ST", "STATE"), print(geography, quote = FALSE), print("Error: Incorrect Geography Level"))
-    if (geography_value == "*"){ 
-    print(geography_value, quote = FALSE)
-  } else if (((geography == "REGION") & (geography_value %in% c("1", "2", "3", "4"))) | ((geography == "DIVISION") & (geography_value %in% c("1", "2", "3", "4", "5", "6", "7", "8", "9"))) | ((geography == "ST") & (geography_value %in% c("01", "02", "04", "05", "06", "08", "09", "10", "11", "12", "13", "15", "16", "17", "18", "19", "20","21", "22", "23", "24","25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "44", "45", "46", "47", "48","49", "50", "51", "53", "54", "55", "56"))) | ((geography == "STATE") & (geography_value %in% c("01", "02", "04", "05", "06", "08","09", "10", "11", "12", "13", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "44", "45", "46", "47", "48", "49", "50", "51", "53", "54", "55", "56")))){
-    print(geography_value, quote = FALSE)
-    } else {print("Error: Incorrect Geography Subset Specified")}
-
-# coding for URL begins after formatting completed
-  result <- httr::GET(paste0("https://api.census.gov/data/",
-                             year,
-                             "/acs/acs1/pums?get=",
-                             numeric1,
-                             ",",
-                             numeric2,
-                             ",",
-                             categorical1,
-                             "&for=",
-                             geography,
-                             ":",
-                             geography_value,
-                             "&key=b195a5a7b89af4ff112dcbfe5e6a9eff2102afad"
-  ))
-  return(result)}
-query_census()
-
-```
+Since all of the outputs are working as we'd like them to, we can move forward with creating more complex functions.
 
 ## Combining Years
+If we want to search for multiple years at once, we're going to have to slightly modify the function above:
+```{r}
+,
+                  if (geography == "REGION") {REGION <- factor(region,1:4, print(variable_list$REGION$values$item))},
+                  if (geography == "DIVISION") {DIVISION <- factor(division, 1:9, print(variable_list$DIVISION$values$item))},
+                  if (geography == "ST") {ST <- factor(st, levels = c(01:02, 04:06, 08:13, 15:42, 44:51, 53:56, 72), labels = print(variable_list$ST$values$item))},
+                  if (geography == "STATE") {STATE <- factor(state, levels = c(01:02, 04:06, 08:13, 15:42, 44:51, 53:56, 72), labels = print(variable_list$STATE$values$item))}
+```
+
 # Part 2: Writing a Generic Function for Summarizing
 ## Generic Functions
 ## Numeric Summaries
